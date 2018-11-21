@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/memberlist"
 	"github.com/micro/go-log"
 	"github.com/micro/go-micro/cmd"
 	"github.com/micro/go-micro/registry"
 	"github.com/mitchellh/hashstructure"
-	"github.com/pborman/uuid"
 )
 
 type action int
@@ -106,7 +106,7 @@ func configure(g *gossipRegistry, opts ...registry.Option) error {
 
 	c := memberlist.DefaultLocalConfig()
 	c.BindPort = 0
-	c.Name = hostname + "-" + uuid.NewUUID().String()
+	c.Name = hostname + "-" + uuid.New().String()
 	c.Delegate = &delegate{
 		updates:    g.updates,
 		broadcasts: broadcasts,
@@ -315,7 +315,7 @@ func (m *gossipRegistry) subscribe() (chan *registry.Result, chan bool) {
 	next := make(chan *registry.Result, 10)
 	exit := make(chan bool)
 
-	id := uuid.NewUUID().String()
+	id := uuid.New().String()
 
 	m.s.Lock()
 	m.subs[id] = next
