@@ -1,26 +1,23 @@
 # Gossip Registry
 
-Gossip is a registry plugin for go-micro which uses hashicorp/memberlist to broadcast registry information
-via the SWIM protocol.
+Gossip is a zero dependency registry which uses hashicorp/memberlist to broadcast registry information via the SWIM protocol.
 
 ## Usage
 
-Import the plugin as per usual
+Start with the registry flag or env var
 
-```go
-import _ "github.com/micro/go-plugins/registry/gossip"
-```
-
-Start with the registry flag
-
-```go
-go run service.go --registry=gossip
+```bash
+MICRO_REGISTRY=gossip go run service.go
 ```
 
 On startup you'll see something like
 
-```go
-2016/06/19 14:05:43 Local memberlist node 127.0.0.1:45465
+```bash
+2018/12/06 18:17:48 Registry Listening on 192.168.1.65:56390
 ```
 
-To join this gossip ring use `--registry=gossip --registry_address 127.0.0.1:45465` when starting other nodes
+To join this gossip ring set the registry address using flag or env var
+
+```bash
+MICRO_REGISTRY_ADDRESS= 192.168.1.65:56390
+```
