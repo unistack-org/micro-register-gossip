@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/memberlist"
 	"github.com/micro/go-micro/config/cmd"
 	"github.com/micro/go-micro/registry"
-	pb "github.com/micro/go-micro/registry/gossip/proto"
+	pb "github.com/micro/go-plugins/registry/gossip/proto"
 	log "github.com/micro/go-micro/util/log"
 	"github.com/mitchellh/hashstructure"
 )
