@@ -1,6 +1,7 @@
 package gossip
 
 import (
+	"context"
 	"os"
 	"sync"
 	"testing"
@@ -8,7 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/memberlist"
-	"github.com/micro/go-micro/v2/registry"
+	"github.com/unistack-org/micro/v3/logger"
+	"github.com/unistack-org/micro/v3/register"
 )
 
 func newMemberlistConfig() *memberlist.Config {
@@ -24,43 +26,58 @@ func newMemberlistConfig() *memberlist.Config {
 	return mc
 }
 
-func newRegistry(opts ...registry.Option) registry.Registry {
-	options := []registry.Option{
+func newRegister(opts ...register.Option) register.Register {
+	options := []register.Option{
 		ConnectRetry(true),
 		ConnectTimeout(60 * time.Second),
 	}
 
 	options = append(options, opts...)
-	r := NewRegistry(options...)
+	r := NewRegister(options...)
 	return r
 }
 
-func TestGossipRegistryBroadcast(t *testing.T) {
+func TestGossipRegisterBroadcast(t *testing.T) {
 	if tr := os.Getenv("TRAVIS"); len(tr) > 0 {
 		t.Skip()
 	}
+	ctx := context.Background()
 
 	mc1 := newMemberlistConfig()
-	r1 := newRegistry(Config(mc1), Address("127.0.0.1:54321"))
+	r1 := newRegister(Config(mc1), Address("127.0.0.1:54321"))
 
 	mc2 := newMemberlistConfig()
-	r2 := newRegistry(Config(mc2), Address("127.0.0.1:54322"), registry.Addrs("127.0.0.1:54321"))
+	r2 := newRegister(Config(mc2), Address("127.0.0.1:54322"), register.Addrs("127.0.0.1:54321"))
 
-	defer r1.(*gossipRegistry).Stop()
-	defer r2.(*gossipRegistry).Stop()
-
-	svc1 := &registry.Service{Name: "service.1", Version: "0.0.0.1"}
-	svc2 := &registry.Service{Name: "service.2", Version: "0.0.0.2"}
-
-	if err := r1.Register(svc1, registry.RegisterTTL(10*time.Second)); err != nil {
+	if err := r1.Init(); err != nil {
 		t.Fatal(err)
 	}
-	if err := r2.Register(svc2, registry.RegisterTTL(10*time.Second)); err != nil {
+	if err := r2.Init(); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := r1.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := r2.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	defer r1.(*gossipRegister).Stop()
+	defer r2.(*gossipRegister).Stop()
+
+	svc1 := &register.Service{Name: "service.1", Version: "0.0.0.1"}
+	svc2 := &register.Service{Name: "service.2", Version: "0.0.0.2"}
+
+	if err := r1.Register(ctx, svc1, register.RegisterTTL(10*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if err := r2.Register(ctx, svc2, register.RegisterTTL(10*time.Second)); err != nil {
 		t.Fatal(err)
 	}
 
 	var found bool
-	svcs, err := r1.ListServices()
+	svcs, err := r1.ListServices(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,12 +88,12 @@ func TestGossipRegistryBroadcast(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Fatalf("[gossip registry] service.2 not found in r1, broadcast not work")
+		t.Fatalf("[gossip register] service.2 not found in r1, broadcast not work")
 	}
 
 	found = false
 
-	svcs, err = r2.ListServices()
+	svcs, err = r2.ListServices(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,33 +105,48 @@ func TestGossipRegistryBroadcast(t *testing.T) {
 	}
 
 	if !found {
-		t.Fatalf("[gossip registry] broadcast failed: service.1 not found in r2")
+		t.Fatalf("[gossip register] broadcast failed: service.1 not found in r2")
 	}
 
-	if err := r1.Deregister(svc1); err != nil {
+	if err := r1.Deregister(ctx, svc1); err != nil {
 		t.Fatal(err)
 	}
-	if err := r2.Deregister(svc2); err != nil {
+	if err := r2.Deregister(ctx, svc2); err != nil {
 		t.Fatal(err)
 	}
 
 }
-func TestGossipRegistryRetry(t *testing.T) {
+func TestGossipRegisterRetry(t *testing.T) {
 	if tr := os.Getenv("TRAVIS"); len(tr) > 0 {
 		t.Skip()
 	}
-
+	ctx := context.Background()
+	logger.DefaultLogger = logger.NewLogger(logger.WithLevel(logger.TraceLevel))
 	mc1 := newMemberlistConfig()
-	r1 := newRegistry(Config(mc1), Address("127.0.0.1:54321"))
+	r1 := newRegister(Config(mc1), Address("127.0.0.1:54321"))
 
 	mc2 := newMemberlistConfig()
-	r2 := newRegistry(Config(mc2), Address("127.0.0.1:54322"), registry.Addrs("127.0.0.1:54321"))
+	r2 := newRegister(Config(mc2), Address("127.0.0.1:54322"), register.Addrs("127.0.0.1:54321"))
 
-	defer r1.(*gossipRegistry).Stop()
-	defer r2.(*gossipRegistry).Stop()
+	if err := r1.Init(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r2.Init(); err != nil {
+		t.Fatal(err)
+	}
 
-	svc1 := &registry.Service{Name: "service.1", Version: "0.0.0.1"}
-	svc2 := &registry.Service{Name: "service.2", Version: "0.0.0.2"}
+	if err := r1.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := r2.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	defer r1.(*gossipRegister).Stop()
+	defer r2.(*gossipRegister).Stop()
+
+	svc1 := &register.Service{Name: "service.1", Version: "0.0.0.1"}
+	svc2 := &register.Service{Name: "service.2", Version: "0.0.0.2"}
 
 	var mu sync.Mutex
 	ch := make(chan struct{})
@@ -124,13 +156,15 @@ func TestGossipRegistryRetry(t *testing.T) {
 	go func() {
 		for {
 			select {
+			case <-ctx.Done():
+				break
 			case <-ticker.C:
 				mu.Lock()
 				if r1 != nil {
-					r1.Register(svc1, registry.RegisterTTL(2*time.Second))
+					r1.Register(ctx, svc1, register.RegisterTTL(2*time.Second))
 				}
 				if r2 != nil {
-					r2.Register(svc2, registry.RegisterTTL(2*time.Second))
+					r2.Register(ctx, svc2, register.RegisterTTL(2*time.Second))
 				}
 				if ch != nil {
 					close(ch)
@@ -144,7 +178,7 @@ func TestGossipRegistryRetry(t *testing.T) {
 	<-ch
 	var found bool
 
-	svcs, err := r2.ListServices()
+	svcs, err := r2.ListServices(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,11 +190,11 @@ func TestGossipRegistryRetry(t *testing.T) {
 	}
 
 	if !found {
-		t.Fatalf("[gossip registry] broadcast failed: service.1 not found in r2")
+		t.Fatalf("[gossip register] broadcast failed: service.1 not found in r2")
 	}
 
-	if err = r1.(*gossipRegistry).Stop(); err != nil {
-		t.Fatalf("[gossip registry] failed to stop registry: %v", err)
+	if err = r1.(*gossipRegister).Stop(); err != nil {
+		t.Fatalf("[gossip register] failed to stop register: %v", err)
 	}
 
 	mu.Lock()
@@ -170,7 +204,7 @@ func TestGossipRegistryRetry(t *testing.T) {
 	<-time.After(3 * time.Second)
 
 	found = false
-	svcs, err = r2.ListServices()
+	svcs, err = r2.ListServices(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,14 +216,14 @@ func TestGossipRegistryRetry(t *testing.T) {
 	}
 
 	if found {
-		t.Fatalf("[gossip registry] service.1 found in r2")
+		t.Fatalf("[gossip register] service.1 found in r2")
 	}
 
-	r1 = newRegistry(Config(mc1), Address("127.0.0.1:54321"))
+	r1 = newRegister(Config(mc1), Address("127.0.0.1:54321"))
 	<-time.After(2 * time.Second)
 
 	found = false
-	svcs, err = r2.ListServices()
+	svcs, err = r2.ListServices(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,16 +235,16 @@ func TestGossipRegistryRetry(t *testing.T) {
 	}
 
 	if !found {
-		t.Fatalf("[gossip registry] connect retry failed: service.1 not found in r2")
+		t.Fatalf("[gossip register] connect retry failed: service.1 not found in r2")
 	}
 
-	if err := r1.Deregister(svc1); err != nil {
+	if err := r1.Deregister(ctx, svc1); err != nil {
 		t.Fatal(err)
 	}
-	if err := r2.Deregister(svc2); err != nil {
+	if err := r2.Deregister(ctx, svc2); err != nil {
 		t.Fatal(err)
 	}
 
-	r1.(*gossipRegistry).Stop()
-	r2.(*gossipRegistry).Stop()
+	r1.(*gossipRegister).Stop()
+	r2.(*gossipRegister).Stop()
 }

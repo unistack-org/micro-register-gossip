@@ -1,11 +1,10 @@
 package gossip
 
 import (
-	"context"
 	"time"
 
 	"github.com/hashicorp/memberlist"
-	"github.com/micro/go-micro/v2/registry"
+	"github.com/unistack-org/micro/v3/register"
 )
 
 type secretKey struct{}
@@ -15,44 +14,34 @@ type advertiseKey struct{}
 type connectTimeoutKey struct{}
 type connectRetryKey struct{}
 
-// helper for setting registry options
-func setRegistryOption(k, v interface{}) registry.Option {
-	return func(o *registry.Options) {
-		if o.Context == nil {
-			o.Context = context.Background()
-		}
-		o.Context = context.WithValue(o.Context, k, v)
-	}
-}
-
 // Secret specifies an encryption key. The value should be either
 // 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
-func Secret(k []byte) registry.Option {
-	return setRegistryOption(secretKey{}, k)
+func Secret(k []byte) register.Option {
+	return register.SetOption(secretKey{}, k)
 }
 
 // Address to bind to - host:port
-func Address(a string) registry.Option {
-	return setRegistryOption(addressKey{}, a)
+func Address(a string) register.Option {
+	return register.SetOption(addressKey{}, a)
 }
 
 // Config sets *memberlist.Config for configuring gossip
-func Config(c *memberlist.Config) registry.Option {
-	return setRegistryOption(configKey{}, c)
+func Config(c *memberlist.Config) register.Option {
+	return register.SetOption(configKey{}, c)
 }
 
 // The address to advertise for other gossip members to connect to - host:port
-func Advertise(a string) registry.Option {
-	return setRegistryOption(advertiseKey{}, a)
+func Advertise(a string) register.Option {
+	return register.SetOption(advertiseKey{}, a)
 }
 
-// ConnectTimeout sets the registry connect timeout. Use -1 to specify infinite timeout
-func ConnectTimeout(td time.Duration) registry.Option {
-	return setRegistryOption(connectTimeoutKey{}, td)
+// ConnectTimeout sets the register connect timeout. Use -1 to specify infinite timeout
+func ConnectTimeout(td time.Duration) register.Option {
+	return register.SetOption(connectTimeoutKey{}, td)
 }
 
-// ConnectRetry enables reconnect to registry then connection closed,
+// ConnectRetry enables reconnect to register then connection closed,
 // use with ConnectTimeout to specify how long retry
-func ConnectRetry(v bool) registry.Option {
-	return setRegistryOption(connectRetryKey{}, v)
+func ConnectRetry(v bool) register.Option {
+	return register.SetOption(connectRetryKey{}, v)
 }

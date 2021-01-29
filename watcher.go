@@ -1,17 +1,17 @@
 package gossip
 
 import (
-	"github.com/micro/go-micro/v2/registry"
+	"github.com/unistack-org/micro/v3/register"
 )
 
 type gossipWatcher struct {
-	wo   registry.WatchOptions
-	next chan *registry.Result
+	wo   register.WatchOptions
+	next chan *register.Result
 	stop chan bool
 }
 
-func newGossipWatcher(ch chan *registry.Result, stop chan bool, opts ...registry.WatchOption) (registry.Watcher, error) {
-	var wo registry.WatchOptions
+func newGossipWatcher(ch chan *register.Result, stop chan bool, opts ...register.WatchOption) (register.Watcher, error) {
+	var wo register.WatchOptions
 	for _, o := range opts {
 		o(&wo)
 	}
@@ -23,22 +23,22 @@ func newGossipWatcher(ch chan *registry.Result, stop chan bool, opts ...registry
 	}, nil
 }
 
-func (m *gossipWatcher) Next() (*registry.Result, error) {
+func (m *gossipWatcher) Next() (*register.Result, error) {
 	for {
 		select {
 		case r, ok := <-m.next:
 			if !ok {
-				return nil, registry.ErrWatcherStopped
+				return nil, register.ErrWatcherStopped
 			}
 			// check watch options
 			if len(m.wo.Service) > 0 && r.Service.Name != m.wo.Service {
 				continue
 			}
-			nr := &registry.Result{}
+			nr := &register.Result{}
 			*nr = *r
 			return nr, nil
 		case <-m.stop:
-			return nil, registry.ErrWatcherStopped
+			return nil, register.ErrWatcherStopped
 		}
 	}
 }
