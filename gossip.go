@@ -17,7 +17,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/hashicorp/memberlist"
-	"github.com/mitchellh/hashstructure"
+	"github.com/mitchellh/hashstructure/v2"
 	pb "github.com/unistack-org/micro-register-gossip/v3/proto"
 	"github.com/unistack-org/micro/v3/logger"
 	"github.com/unistack-org/micro/v3/register"
@@ -659,7 +659,7 @@ func (g *gossipRegister) run() {
 			// we need to expire the node at some point in the future
 			if u.Update.Expires > 0 {
 				// create a hash of this service
-				if hash, err := hashstructure.Hash(u.Service, nil); err == nil {
+				if hash, err := hashstructure.Hash(u.Service, hashstructure.FormatV2, nil); err == nil {
 					updates.Lock()
 					updates.services[hash] = u
 					updates.Unlock()
@@ -680,7 +680,7 @@ func (g *gossipRegister) run() {
 			go g.publish(actionTypeString(actionTypeDelete), []*register.Service{u.Service})
 
 			// delete from expiry checks
-			if hash, err := hashstructure.Hash(u.Service, nil); err == nil {
+			if hash, err := hashstructure.Hash(u.Service, hashstructure.FormatV2, nil); err == nil {
 				updates.Lock()
 				delete(updates.services, hash)
 				updates.Unlock()
