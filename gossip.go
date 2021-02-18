@@ -4,6 +4,7 @@ package gossip
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -26,6 +27,10 @@ import (
 // use register.Result int32 values after it switches from string to int32 types
 // type actionType int32
 // type updateType int32
+
+var (
+	ErrNotConnected = errors.New("register not connected")
+)
 
 const (
 	actionTypeInvalid int32 = iota
@@ -100,6 +105,7 @@ type gossipRegister struct {
 	interval    time.Duration
 	tcpInterval time.Duration
 
+	connected      bool
 	connectRetry   bool
 	connectTimeout time.Duration
 	sync.RWMutex
@@ -396,6 +402,7 @@ func (d *delegate) MergeRemoteState(buf []byte, join bool) {
 }
 
 func (g *gossipRegister) Connect(ctx context.Context) error {
+	g.connected = true
 	return nil
 	//return g.connect(g.opts.Addrs)
 }
@@ -491,6 +498,7 @@ func (g *gossipRegister) subscribe() (chan *register.Result, chan bool) {
 }
 
 func (g *gossipRegister) Stop() error {
+	g.connected = false
 	select {
 	case <-g.done:
 		return nil
@@ -724,6 +732,9 @@ func (g *gossipRegister) Name() string {
 }
 
 func (g *gossipRegister) Register(ctx context.Context, s *register.Service, opts ...register.RegisterOption) error {
+	if !g.connected {
+		return ErrNotConnected
+	}
 	if g.opts.Logger.V(logger.DebugLevel) {
 		g.opts.Logger.Debugf(g.opts.Context, "[gossip] Register registering service: %s", s.Name)
 	}
@@ -776,6 +787,9 @@ func (g *gossipRegister) Register(ctx context.Context, s *register.Service, opts
 }
 
 func (g *gossipRegister) Deregister(ctx context.Context, s *register.Service, opts ...register.DeregisterOption) error {
+	if !g.connected {
+		return ErrNotConnected
+	}
 
 	if g.opts.Logger.V(logger.DebugLevel) {
 		g.opts.Logger.Debugf(g.opts.Context, "[gossip] Register deregistering service: %s", s.Name)

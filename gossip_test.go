@@ -193,15 +193,14 @@ func TestGossipRegisterRetry(t *testing.T) {
 		t.Fatalf("[gossip register] broadcast failed: service.1 not found in r2")
 	}
 
-	if err = r1.(*gossipRegister).Stop(); err != nil {
+	mu.Lock()
+	if err = r1.Disconnect(ctx); err != nil {
 		t.Fatalf("[gossip register] failed to stop register: %v", err)
 	}
-
-	mu.Lock()
 	r1 = nil
 	mu.Unlock()
 
-	<-time.After(3 * time.Second)
+	<-time.After(4 * time.Second)
 
 	found = false
 	svcs, err = r2.ListServices(ctx)
@@ -219,7 +218,15 @@ func TestGossipRegisterRetry(t *testing.T) {
 		t.Fatalf("[gossip register] service.1 found in r2")
 	}
 
+	mu.Lock()
 	r1 = newRegister(Config(mc1), Address("127.0.0.1:54321"))
+	if err := r1.Init(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r1.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
+	mu.Unlock()
 	<-time.After(2 * time.Second)
 
 	found = false
