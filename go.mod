@@ -9,6 +9,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/memberlist v0.2.2
 	github.com/mitchellh/hashstructure v1.1.0
-	github.com/unistack-org/micro/v3 v3.2.8
+	github.com/unistack-org/micro/v3 v3.2.14
 	google.golang.org/protobuf v1.25.0
 )
