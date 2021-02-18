@@ -1,6 +1,6 @@
 module github.com/unistack-org/micro-register-gossip/v3
 
-go 1.13
+go 1.16
 
 require (
 	github.com/armon/go-metrics v0.3.6 // indirect
