@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/armon/go-metrics v0.3.6 // indirect
-	github.com/golang/protobuf v1.5.1
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect

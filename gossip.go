@@ -14,7 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/hashicorp/memberlist"
 	"github.com/mitchellh/hashstructure/v2"
@@ -22,6 +21,7 @@ import (
 	"github.com/unistack-org/micro/v3/logger"
 	"github.com/unistack-org/micro/v3/register"
 	regutil "github.com/unistack-org/micro/v3/util/register"
+	"google.golang.org/protobuf/proto"
 )
 
 // use register.Result int32 values after it switches from string to int32 types
