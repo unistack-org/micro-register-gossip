@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/memberlist v0.2.3
 	github.com/miekg/dns v1.1.38 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.1
-	github.com/unistack-org/micro/v3 v3.3.13
+	github.com/unistack-org/micro/v3 v3.3.14
 	golang.org/x/crypto v0.0.0-20210218145215-b8e89b74b9df // indirect
 	google.golang.org/protobuf v1.26.0
 )
