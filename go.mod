@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/hashicorp/memberlist v0.2.3
+	github.com/hashicorp/memberlist v0.2.4
 	github.com/miekg/dns v1.1.38 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.1
 	github.com/unistack-org/micro/v3 v3.3.17
