@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/memberlist v0.2.4
 	github.com/mitchellh/hashstructure/v2 v2.0.1
 	github.com/unistack-org/micro/v3 v3.3.17
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
