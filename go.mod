@@ -1,6 +1,6 @@
 module github.com/unistack-org/micro-register-gossip/v3
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/google/uuid v1.2.0
@@ -22,8 +22,8 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/miekg/dns v1.1.38 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 )
