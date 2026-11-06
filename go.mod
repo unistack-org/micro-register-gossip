@@ -7,13 +7,12 @@ require (
 	github.com/hashicorp/memberlist v0.2.4
 	github.com/mitchellh/hashstructure/v2 v2.0.1
 	github.com/unistack-org/micro/v3 v3.3.17
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
 	github.com/armon/go-metrics v0.3.6 // indirect
 	github.com/google/btree v1.0.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
 	github.com/hashicorp/go-msgpack v1.1.5 // indirect
