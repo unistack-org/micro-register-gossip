@@ -3,7 +3,7 @@ module github.com/unistack-org/micro-register-gossip/v3
 go 1.25.0
 
 require (
-	github.com/google/uuid v1.2.0
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/memberlist v0.7.0
 	github.com/mitchellh/hashstructure/v2 v2.0.1
 	github.com/unistack-org/micro/v3 v3.3.17
